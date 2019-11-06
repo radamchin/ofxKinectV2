@@ -26,6 +26,33 @@ ofxKinectV2::ofxKinectV2()
     params.add(minDistance.set("minDistance", 500, 0, 12000));
     params.add(maxDistance.set("maxDistance", 6000, 0, 24000));
     params.add(irExposure.set("irExposure", 1.0, 0.01, 10.0));
+    
+    
+    // RGB cam controls
+    params.add(autoExposure.set("Auto Exposure", true));
+    autoExposure.addListener(this, &ofxKinectV2::setAutoExposureCallback);
+    
+    // Below 2 are for adjusting exposure when auto is off
+    params.add(expIntegrationTime.set("Shutter speed", 50.0, 0.0, 66.0));
+    expIntegrationTime.addListener(this, &ofxKinectV2::setIntegrationTimeCallback);
+    
+    params.add(analogueGain.set("analogueGain", 3.0, 1.0, 4.0));
+    analogueGain.addListener(this, &ofxKinectV2::setAnalogueGainCallback);
+
+    
+    params.add(autoWhiteBalance.set("Auto White Balance", true));
+    autoWhiteBalance.addListener(this, &ofxKinectV2::setAutoWhiteBalanceCallback);
+    
+    // Below 3 are for adjusting white balance when auto is off
+    params.add(redGain.set("redGain", 2.0, 0.01, 4.0));
+    redGain.addListener(this, &ofxKinectV2::setRedGainCallback);
+    
+    params.add(blueGain.set("blueGain", 2.0, 0.01, 4.0));
+    blueGain.addListener(this, &ofxKinectV2::setBlueGainCallback);
+    
+    params.add(greenGain.set("greenGain", 2.0, 0.01, 4.0));
+    greenGain.addListener(this, &ofxKinectV2::setGreenGainCallback);
+    
 }
 
 
@@ -96,7 +123,7 @@ bool ofxKinectV2::open(const std::string& serial, ofxKinectV2::Settings asetting
 {
     close(); 
 
-    params.setName("kinectV2 " + serial);
+    params.setName("KinectV2 " + serial);
     
     bNewFrame  = false;
     bNewBuffer = false;
@@ -313,6 +340,64 @@ bool ofxKinectV2::isRGBRegistrationEnabled() const {
 	return mSettings.enableRGBRegistration;
 }
 
+// ------------------------------------------
+
+void ofxKinectV2::setAutoExposureCallback(bool & auto_exposure){
+    if(auto_exposure){
+        autoExposure = true;
+        protonect.dev->setColorAutoExposure(0);
+    }
+}
+
+void ofxKinectV2::setIntegrationTimeCallback(float & integration_time_ms){
+    protonect.dev->setColorManualExposure(integration_time_ms, analogueGain);
+    autoExposure = false;
+}
+
+void ofxKinectV2::setAnalogueGainCallback(float & analog_gain){
+    protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_ACS, uint32_t(0));
+    protonect.dev->setColorManualExposure(expIntegrationTime, analog_gain);
+    autoExposure = false;
+}
+
+void ofxKinectV2::setAutoWhiteBalanceCallback(bool & auto_white_balance){
+    if(auto_white_balance == true){
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_ACS, uint32_t(0));
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_WHITE_BALANCE_MODE, uint32_t(1));
+    }else{
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_ACS, uint32_t(0));
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_WHITE_BALANCE_MODE, uint32_t(3));
+    }
+}
+
+void ofxKinectV2::setRedGainCallback(float & red_gain){
+    if(autoWhiteBalance){
+        autoWhiteBalance = false;
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_ACS, uint32_t(0));
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_WHITE_BALANCE_MODE, uint32_t(3));
+    }
+    protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_RED_CHANNEL_GAIN, red_gain);
+}
+
+void ofxKinectV2::setGreenGainCallback(float & green_gain){
+    if(autoWhiteBalance){
+        autoWhiteBalance = false;
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_ACS, uint32_t(0));
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_WHITE_BALANCE_MODE, uint32_t(3));
+    }
+    protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_GREEN_CHANNEL_GAIN, green_gain);
+}
+
+void ofxKinectV2::setBlueGainCallback(float & blue_gain){
+    if(autoWhiteBalance){
+        autoWhiteBalance = false;
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_ACS, uint32_t(0));
+        protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_WHITE_BALANCE_MODE, uint32_t(3));
+    }
+    protonect.dev->setColorSetting(libfreenect2::COLOR_SETTING_SET_BLUE_CHANNEL_GAIN, blue_gain);
+}
+
+// ------------------------------------------
 
 void ofxKinectV2::close()
 {

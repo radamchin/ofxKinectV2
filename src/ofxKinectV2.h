@@ -110,7 +110,28 @@ public:
     ofParameter<float> minDistance;
     ofParameter<float> maxDistance;
     ofParameter<float> irExposure;
+    
+    // For RGB Cam:
+    ofParameter<bool> autoExposure;
+    ofParameter<float> expIntegrationTime;
+    ofParameter<float> analogueGain;
+    
+    ofParameter<bool> autoWhiteBalance;
+    ofParameter<float> redGain;
+    ofParameter<float> blueGain;
+    ofParameter<float> greenGain;
+    
+    void setAutoExposureCallback(bool & auto_exposure);
+    
+    void setIntegrationTimeCallback(float & integration_time_ms);
+    void setAnalogueGainCallback(float & analog_gain);
+    
+    void setAutoWhiteBalanceCallback(bool & auto_white_balance);
+    void setRedGainCallback(float & red_gain);
+    void setGreenGainCallback(float & green_gain);
+    void setBlueGainCallback(float & blue_gain);
 
+    
 protected:
     void threadedFunction();
 
