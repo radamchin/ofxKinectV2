@@ -29,8 +29,6 @@ ofxKinectV2::ofxKinectV2()
     
     
     // RGB cam controls
-    params.add(autoExposure.set("Auto Exposure", true));
-    autoExposure.addListener(this, &ofxKinectV2::setAutoExposureCallback);
     
     // Below 2 are for adjusting exposure when auto is off
     params.add(expIntegrationTime.set("Shutter speed", 50.0, 0.0, 66.0));
@@ -38,10 +36,10 @@ ofxKinectV2::ofxKinectV2()
     
     params.add(analogueGain.set("analogueGain", 3.0, 1.0, 4.0));
     analogueGain.addListener(this, &ofxKinectV2::setAnalogueGainCallback);
-
     
-    params.add(autoWhiteBalance.set("Auto White Balance", true));
-    autoWhiteBalance.addListener(this, &ofxKinectV2::setAutoWhiteBalanceCallback);
+    params.add(autoExposure.set("Auto Exposure", true));
+    autoExposure.addListener(this, &ofxKinectV2::setAutoExposureCallback);
+    
     
     // Below 3 are for adjusting white balance when auto is off
     params.add(redGain.set("redGain", 2.0, 0.01, 4.0));
@@ -52,6 +50,9 @@ ofxKinectV2::ofxKinectV2()
     
     params.add(greenGain.set("greenGain", 2.0, 0.01, 4.0));
     greenGain.addListener(this, &ofxKinectV2::setGreenGainCallback);
+    
+    params.add(autoWhiteBalance.set("Auto White Balance", true));
+    autoWhiteBalance.addListener(this, &ofxKinectV2::setAutoWhiteBalanceCallback);
     
 }
 
