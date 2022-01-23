@@ -136,6 +136,7 @@ bool ofxKinectV2::open(const std::string& serial, ofxKinectV2::Settings asetting
 	protonect.setDepthEnabled(asettings.enableDepth);
 	protonect.setIREnabled(asettings.enableIR);
 	protonect.setEnableRGBRegistration(asettings.enableRGBRegistration);
+	protonect.setEnableDepthRegistration(asettings.enableDepthRegistration);
     int retVal = protonect.open(serial,asettings.pipeline,asettings.config);
     
     if (retVal != 0)
@@ -160,12 +161,21 @@ void ofxKinectV2::threadedFunction()
                                rawIRPixelsBack,
                                distancePixelsBack);
         
-        pixelsFront.swap(pixelsBack);
-        registeredPixelsFront.swap(registeredPixelsBack);
-        rawDepthPixelsFront.swap(rawDepthPixelsBack);
-        rawIRPixelsFront.swap(rawIRPixelsBack);
-        distancePixelsFront.swap(distancePixelsBack);
-        
+		if (mSettings.enableRGB) {
+			pixelsFront.swap(pixelsBack);
+		}
+		if (mSettings.enableRGBRegistration) {
+			registeredPixelsFront.swap(registeredPixelsBack);
+		}
+		if (mSettings.enableIR) {
+			rawIRPixelsFront.swap(rawIRPixelsBack);
+		}
+		if (mSettings.enableDepth) {
+			rawDepthPixelsFront.swap(rawDepthPixelsBack);
+		}
+
+		//distancePixelsFront.swap(distancePixelsBack);
+
         lock();
         bNewBuffer = true;
         unlock();
@@ -183,11 +193,11 @@ void ofxKinectV2::update()
     
     if (bNewBuffer)
     {
-        lock();
-            pixels = pixelsFront;
-            registeredPixels = registeredPixelsFront;
-            rawDepthPixels = rawDepthPixelsFront;
-            rawIRPixels = rawIRPixelsFront;
+		lock();
+			if (mSettings.enableRGB) pixels = pixelsFront;
+			if (mSettings.enableRGBRegistration) registeredPixels = registeredPixelsFront;
+			if (mSettings.enableDepth) rawDepthPixels = rawDepthPixelsFront;
+			if (mSettings.enableIR) rawIRPixels = rawIRPixelsFront;
             bNewBuffer = false;
         unlock();
 
@@ -294,12 +304,12 @@ float ofxKinectV2::getDistanceAt(std::size_t x, std::size_t y) const
 
 glm::vec3 ofxKinectV2::getWorldCoordinateAt(std::size_t x, std::size_t y) const
 {
-    glm::vec3 position;
+	glm::vec3 position = {0,0,0};
     
     if (protonect.registration && protonect.undistorted)
     {
-//        std::cout << x << ", " << protonect.undistorted->width << std::endl;
-//        std::cout << y << ", " << protonect.undistorted->height << std::endl;
+        //std::cout << x << ", " << protonect.undistorted->width << std::endl;
+        //std::cout << y << ", " << protonect.undistorted->height << std::endl;
 //        
         if (x < protonect.undistorted->width && y < protonect.undistorted->height)
             protonect.registration->getPointXYZ(protonect.undistorted, y, x, position.x, position.y, position.z);
